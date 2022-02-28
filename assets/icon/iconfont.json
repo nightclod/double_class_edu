@@ -1,0 +1,191 @@
+{
+  "id": "3170762",
+  "name": "双师",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "双师后台系统",
+  "glyphs": [
+    {
+      "icon_id": "27843456",
+      "name": "xuexiao",
+      "font_class": "xuexiao1",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "27822903",
+      "name": "banji",
+      "font_class": "banji1",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "27822953",
+      "name": "renyuan",
+      "font_class": "renyuan",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "1304878",
+      "name": "关闭",
+      "font_class": "guanbi1",
+      "unicode": "e620",
+      "unicode_decimal": 58912
+    },
+    {
+      "icon_id": "2815708",
+      "name": "更多",
+      "font_class": "gengduo",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "2894377",
+      "name": "详细",
+      "font_class": "detail",
+      "unicode": "e786",
+      "unicode_decimal": 59270
+    },
+    {
+      "icon_id": "14477196",
+      "name": "静音",
+      "font_class": "jingyin",
+      "unicode": "e672",
+      "unicode_decimal": 58994
+    },
+    {
+      "icon_id": "14477197",
+      "name": "视频",
+      "font_class": "shipin",
+      "unicode": "e673",
+      "unicode_decimal": 58995
+    },
+    {
+      "icon_id": "14477199",
+      "name": "视频关",
+      "font_class": "shipinguan",
+      "unicode": "e674",
+      "unicode_decimal": 58996
+    },
+    {
+      "icon_id": "24221841",
+      "name": "yinliang",
+      "font_class": "yinliang",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "8765241",
+      "name": "刷新",
+      "font_class": "shuaxin",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
+      "icon_id": "8802669",
+      "name": "切换",
+      "font_class": "qiehuan",
+      "unicode": "e656",
+      "unicode_decimal": 58966
+    },
+    {
+      "icon_id": "21598353",
+      "name": "上一页",
+      "font_class": "shangyiye",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "1190493",
+      "name": "向右2",
+      "font_class": "xiangyou2",
+      "unicode": "e6fc",
+      "unicode_decimal": 59132
+    },
+    {
+      "icon_id": "805370",
+      "name": "刷新",
+      "font_class": "shuaxin1",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "807276",
+      "name": "缩小",
+      "font_class": "suoxiao",
+      "unicode": "e661",
+      "unicode_decimal": 58977
+    },
+    {
+      "icon_id": "807275",
+      "name": "全屏",
+      "font_class": "quanping",
+      "unicode": "e660",
+      "unicode_decimal": 58976
+    },
+    {
+      "icon_id": "5019163",
+      "name": "答题卡",
+      "font_class": "datiqia",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "5961328",
+      "name": "折线图",
+      "font_class": "zhexiantu",
+      "unicode": "ec66",
+      "unicode_decimal": 60518
+    },
+    {
+      "icon_id": "6348676",
+      "name": "硬件",
+      "font_class": "yingjian",
+      "unicode": "ec89",
+      "unicode_decimal": 60553
+    },
+    {
+      "icon_id": "17711754",
+      "name": "巡课",
+      "font_class": "xunke",
+      "unicode": "e822",
+      "unicode_decimal": 59426
+    },
+    {
+      "icon_id": "21175597",
+      "name": "班级",
+      "font_class": "banji",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "23060488",
+      "name": "设备",
+      "font_class": "shebei",
+      "unicode": "e9fd",
+      "unicode_decimal": 59901
+    },
+    {
+      "icon_id": "26436615",
+      "name": "学校",
+      "font_class": "XX_006",
+      "unicode": "e6b3",
+      "unicode_decimal": 59059
+    },
+    {
+      "icon_id": "26851697",
+      "name": "会议管理",
+      "font_class": "huiyiguanli",
+      "unicode": "ea40",
+      "unicode_decimal": 59968
+    },
+    {
+      "icon_id": "4485676",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    }
+  ]
+}

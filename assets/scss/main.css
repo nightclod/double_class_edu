@@ -1,0 +1,39 @@
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s;
+}
+.page-enter,
+.page-leave-active {
+  opacity: 0;
+}
+
+html {
+  font-family:'Noto Sans SC';
+  font-size: 16px;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  min-width: 1000px;
+  min-height: 300px;
+}
+html,body,#__nuxt,#__layout{height: 100%;width: 100%;overflow: hidden;}
+html,body,ul,li,ol,dl,dd,dt,p,h1,h2,h3,h4,h5,h6,img{ margin:0; padding:0;}
+ul,ol,li{list-style:none;}
+i{font-style:normal;}
+b{font-weight:500;}
+a,u{text-decoration:none;}
+a{display:block; border:0;}
+h1,h2,h3,h4,h5,h6{ font-weight:500; font-size:16px;}
+.clearfix:after{content:".";clear:both;display:block;height:0;overflow:hidden;visibility:hidden;}
+
+
+
+
+
+/* 定制化 */
+.flex{display: flex;}
+.center{display: flex; justify-content: center; align-items: center;}
+.txt-center{text-align: center;}
+.box{box-sizing: border-box;}
