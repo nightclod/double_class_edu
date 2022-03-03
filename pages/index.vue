@@ -8,7 +8,10 @@
                     </div>
                 </h1>
                 <div class="nemus">
-                    <Menuunf :menuwidth="40" :color="'#888'" @menuclick="menuclick"></Menuunf>
+                    <Menuunf 
+                        :menuwidth="40" 
+                        :color="'#888'" 
+                        @menuclick="menuclick"></Menuunf>
                 </div>
             </div>
             <div class="mineinfo">
@@ -27,10 +30,10 @@
         </div>
         <div class="content">
             <div class="menu_main">
-                <Menus ref="menu"></Menus>
+                <Menus ref="menu" @refresh="refresh"></Menus>
             </div>
             <div class="main" ref="main" :style="'width:calc(100% - ' + menuw + 'px);padding-left:' + menuw + 'px;'">
-                <NuxtChild ref="nuxtchild"/>
+                <NuxtChild v-if="show" ref="nuxtchild"/>
             </div>
         </div>
     </div>
@@ -45,6 +48,7 @@ export default {
     data() {
         return {
             loading:false,
+            show:true,
             meundata:[
                 {
                     name:'数据中心',
@@ -54,30 +58,32 @@ export default {
                     name:'巡课管理',
                     route:'tour_management',
                     icon:'icon-xunke'
-                },{
-                    name:'学校管理',
-                    route:'school_management',
-                    icon:'icon-XX_006'
-                },{
-                    name:'班级管理',
-                    route:'class_management',
-                    icon:'icon-banji'
-                },{
+                },
+                // {
+                //     name:'学校管理',
+                //     route:'school_management',
+                //     icon:'icon-XX_006'
+                // },{
+                //     name:'班级管理',
+                //     route:'class_management',
+                //     icon:'icon-banji'
+                // },
+                {
                     name:'会议管理',
                     route:'meeting_management',
                     icon:'icon-huiyiguanli'
-                },{
-                    name:'设备管理',
-                    route:'device_management',
-                    icon:'icon-shebei'
-                },{
-                    name:'答题器',
-                    route:'clicker',
-                    icon:'icon-datiqia'
                 }
+                // ,{
+                //     name:'设备管理',
+                //     route:'device_management',
+                //     icon:'icon-shebei'
+                // },{
+                //     name:'答题器',
+                //     route:'clicker',
+                //     icon:'icon-datiqia'
+                // }
             ],
             menuw:'240'
-            
         }
     },
     computed:{
@@ -87,7 +93,12 @@ export default {
         Menus,
     },
     methods: {
-
+        refresh(){//内容刷新
+            this.show = false;
+            this.$nextTick(()=>{
+                this.show = true;
+            })
+        },
         menuInit(){//初始化菜单
             this.$refs.menu.init();
         },
@@ -102,7 +113,7 @@ export default {
         logout(){//退出登录
             this.$axios.post('/logout').then(res => {
                 if (res.data.code == "0") {
-                    this.$cookies.remove('double_class',{
+                    this.$cookies.remove('double_class_edu',{
                         path:'/'
                     });
                     this.$router.push('/login');

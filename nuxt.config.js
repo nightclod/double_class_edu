@@ -7,7 +7,7 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '书山府双师后台系统' },
+      { hid: 'description', name: 'description', content: '书山府双师教育局后台系统' },
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
@@ -16,7 +16,7 @@ export default {
     ]
   },
   server: {
-    port: 3060,
+    port: 3070,
     timing: false
   },
 
@@ -56,7 +56,7 @@ export default {
 
   proxy: {
     '/index': {
-      target: 'http://192.168.3.87:82/api/system', //http://192.168.3.87:82/api/system     https://www.incourse.com.cn/api/system
+      target: 'http://192.168.3.87:82/api/bureau', //http://192.168.3.87:82/api/bureau     https://www.incourse.com.cn/api/bureau
       changeOrigin: true, // 表示是否跨域
       pathRewrite: {
         '^/index': '', 

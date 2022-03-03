@@ -1,4 +1,4 @@
-# double_class
+# double_class_edu
 
 ## Build Setup
 

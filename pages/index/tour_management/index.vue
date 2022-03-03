@@ -4,6 +4,18 @@
             <div class="title">
                 <h1>巡课管理</h1>
                 <div class="list_filter">
+                    <div class="region">
+                        <el-cascader
+                            clearable
+                            placeholder="请选择学校"
+                            size="small"
+                            v-model="region"
+                            collapse-tags
+                            :props="{ multiple: true }"
+                            :options="region_options"
+                            @change="refresh">
+                        </el-cascader>
+                    </div>
                     <div class="list_screen">
                         <el-button size="small" type="primary" @click="showFull">大屏展示</el-button>
                     </div>
@@ -22,7 +34,7 @@
                                 :class="{'active' : l.active == n}" 
                                 v-for="(m,n) in l.list" 
                                 :key="n"
-                                @click="selectInfo(i,n)">{{ m }}</div>
+                                @click="selectInfo(i,n)">{{ m.name }}</div>
                         </div>
                     </div>
                 </div>
@@ -80,11 +92,13 @@ export default {
     data() {
         return {
             loading:false,
+            region:[],
+            region_options:[],
             filter_info:[{
                 id:'grade',
                 name:'年级',
                 active:0,
-                list:['不限'],
+                list:[{id:null,name:'不限'}],
                 height:48,
                 show:false,
                 open:false
@@ -92,14 +106,14 @@ export default {
                 id:"subject",
                 name:'学科',
                 active:0,
-                list:['不限'],
+                list:[{id:null,name:'不限'}],
                 height:48,
                 show:false,
                 open:false
             }],
             data:[],
-            grade:"不限",
-            subject:"不限",
+            grade:null,
+            subject:null,
             list_width:320,
             list_state:false,
             search:"",
@@ -114,13 +128,75 @@ export default {
     },
     methods: {
         //数据
-        getSubject(){//获取学科
-
-            this.$axios.post('tour/subject').then(res=>{
+        getRegion(){//获取地区
+            this.$axios.post('/tour/region').then(res=>{
                 if(res.data.code && res.data.code != 0){
                     this.$message.error(res.data.msg);
                 }else{
-                    this.$set(this.filter_info[1],"list",['不限',...res.data.obj]);
+                    let info = this.$cookies.get('double_class_edu');
+                    if(info.type == 1){
+                        this.region_options = [];
+                        for(let l of res.data.obj){
+                            let info = {
+                                label : l.region,
+                                value : l.region,
+                                children : []
+                            }
+                            for(let m of l.district){
+                                let data = {
+                                    label : m.region,
+                                    value : m.region,
+                                    children : []
+                                }
+                                for(let k of m.school){
+                                    data.children.push({
+                                        label : k.title,
+                                        value : k.id
+                                    })
+                                }
+                                info.children.push(data)
+                            }
+                            this.region_options.push(info);
+                        }
+                    }else if(info.type == 2){
+                        this.region_options = [];
+                        for(let l of res.data.obj){
+                            let info = {
+                                label : l.region,
+                                value : l.region,
+                                children : []
+                            }
+                            for(let m of l.school){
+                                info.children.push({
+                                    label : m.title,
+                                    value : m.id
+                                })
+                            }
+                            this.region_options.push(info);
+                        }
+                    }else if(info.type == 3){
+                        this.region_options = [];
+                        for(let l of res.data.obj){
+                            this.region_options.push({
+                                label : l.title,
+                                value : l.id
+                            })
+                        }
+                    }
+                }
+            }).catch(err=>{
+                console.log(err)
+                if(!err || err.message !== null){
+                    this.$message.error("获取地区数据失败");
+                }
+            });
+        },
+        getGrade(){//获取年级
+            this.$axios.post('tour/grade').then(res=>{
+                if(res.data.code && res.data.code != 0){
+                    this.$message.error(res.data.msg);
+                }else{
+                    this.$set(this.filter_info[0],"list",[{id:null,name:'不限'},...res.data.obj]);
                     this.$nextTick(()=>{
                         this.detectionFilter();
                     })
@@ -133,12 +209,12 @@ export default {
             });
             
         },
-        getGrade(){//获取年级
-            this.$axios.post('tour/grade').then(res=>{
+        getSubject(){//获取学科
+            this.$axios.post('tour/subject').then(res=>{
                 if(res.data.code && res.data.code != 0){
                     this.$message.error(res.data.msg);
                 }else{
-                    this.$set(this.filter_info[0],"list",['不限',...res.data.obj]);
+                    this.$set(this.filter_info[1],"list",[{id:null,name:'不限'},...res.data.obj]);
                     this.$nextTick(()=>{
                         this.detectionFilter();
                     })
@@ -146,17 +222,31 @@ export default {
             }).catch(err=>{
                 console.log(err)
                 if(!err || err.message !== null){
-                    this.$message.error("获取年级失败");
+                    this.$message.error("获取学科失败");
                 }
             });
+            
+        },
+        refresh(){//刷新
+            this.page = 1;
+            this.getData();
         },
         getData(){//获取列表数据
             if(this.loading){
                 return
             }
             this.loading = true;
+            let school_ids = null;
+            if(this.region.length !== 0){
+                school_ids = [];
+                for(let l of this.region){
+                    school_ids.push(l[l.length - 1])
+                }
+            }
             this.$axios.post('/tour/video',{
-
+                subject:this.subject,
+                school_ids:school_ids,
+                grade:this.grade
             }).then(res=>{
                 this.loading = false;
                 if(res.data.code && res.data.code != 0){
@@ -190,13 +280,12 @@ export default {
                 this.$set(this.filter_info[i],"active",n);
 
                 if(this.filter_info[i].id == 'subject'){
-                    this.subject = this.filter_info[i].list[n];
+                    this.subject = this.filter_info[i].list[n].id;
                 }
                 if(this.filter_info[i].id == 'grade'){
-                    this.grade = this.filter_info[i].list[n];
+                    this.grade = this.filter_info[i].list[n].id;
                 }
-                this.page = 1;
-                // this.getData();
+                this.refresh();
             }
         },
         openInfo(i){//筛选面板 展开、关闭
@@ -244,8 +333,9 @@ export default {
         }
     },
     mounted() {
-        this.getSubject();
+        this.getRegion();
         this.getGrade();
+        this.getSubject();
         this.getData();
         window.onresize=()=>{
             this.detectionFilter();
@@ -272,6 +362,25 @@ export default {
         h1{
             color: #333;
             font-size: 20px;
+        }
+        .list_filter{
+            display: flex;
+            align-items: center;
+            .region{
+                width: 240px;
+                margin-right: 40px;
+                .el-cascader{
+                    width: 100%;
+                    ::v-deep .el-cascader__tags{
+                        flex-wrap: nowrap;
+                        >.el-tag{
+                            &:first-child{
+                                width: calc(100% - 36px);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     .filter{

@@ -15,6 +15,25 @@
                              @click="cutData('attend')">听课</li>
                     </ul>
                 </div>
+                <div class="school">
+                    <el-select 
+                        filterable
+                        remote
+                        clearable
+                        placeholder="请输入学校"
+                        :loading='school_loading'
+                        :remote-method="searchSchool"
+                        @change="getData"
+                        size='small'
+                        v-model="school">
+                        <el-option 
+                            v-for="(l,i) in schools"
+                            :key="i"
+                            :label="l.title"
+                            :value="l.id">
+                        </el-option>
+                    </el-select>
+                </div>
             </div>
             <div class="tour_data">
                 <div class="tour_course tour_info">
@@ -158,15 +177,8 @@
             </div>
             <div class="cooperation">
                 <div class="cooperation_top">
-                    <div class="cooperation_info">
-                        <div class="cooperation_title">合作学校</div>
-                        <div class="cooperation_num">{{ cooperation.relation }}</div>
-                    </div>
-                    <div class="hr"></div>
-                    <div class="cooperation_info">
-                        <div class="cooperation_title">合作学科</div>
-                        <div class="cooperation_num">{{ cooperation.subject }}</div>
-                    </div>
+                    <div class="cooperation_title">参与度最高学校</div>
+                    <div class="cooperation_name" :title="participation">{{ participation }}</div>
                 </div>
                 <div class="cooperation_bottom">
                     <div class="cooperation_live_i">
@@ -192,6 +204,9 @@ export default {
     data() {
         return {
             loading:false,
+            school:null,
+            schools:[],
+            school_loading:false,
             option:'all',
             colors:['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
 
@@ -203,7 +218,7 @@ export default {
             person_subject:{all:{},lecture:{},attend:{}},
             partake:{class: 0,school: 0,sum: 0},
             classroom: 0,
-            cooperation: {relation: 0,subject: 0},
+            participation: "",
 
             detail:null,
             full_left:0,
@@ -219,6 +234,32 @@ export default {
         Chart
     },
     methods: {
+        searchSchool(data){//搜索学校
+            if(this.school_loading){
+                return
+            }
+            if(data !== ''){
+                this.school_loading = true;
+                this.$axios.post('/school',{
+                    search:data
+                }).then(res=>{
+                    this.school_loading = false;
+                    if(res.data.code && res.data.code != 0){
+                        this.$message.error(res.data.msg);
+                    }else{
+                        this.schools = res.data.obj;
+                    }
+                }).catch(err=>{
+                    this.school_loading = false;
+                    console.log(err)
+                    if(!err || err.message !== null){
+                        this.$message.error("获取数据失败");
+                    }
+                });
+            }else{
+                this.schools = [];
+            }
+        },
         cutData(data){//切换数据
             this.option = data;
             this.$refs.course_month.init(this.echartsLineReset(data,'course_month'));
@@ -477,7 +518,9 @@ export default {
                 return
             }
             this.loading = true;
-            this.$axios.post('/datacenter/participate').then(res=>{
+            this.$axios.post('/datacenter/participate',{
+                school_id:this.school || null
+            }).then(res=>{
                 this.loading = false;
                 if(res.data.code && res.data.code != 0){
                     this.$message.error(res.data.msg);
@@ -494,7 +537,7 @@ export default {
         },
         dataProcessing(data){//处理数据
             this.partake = data.partake;
-            this.cooperation = data.cooperation;
+            this.participation = data.sort.title[0];
             this.classroom = data.classroom;
 
             this.dataLine('course_month',data.course);
@@ -524,12 +567,13 @@ export default {
             for(let l of data){
                 x.push(l.month);
                 this[str].all.y.push(l.total);
-                this[str].lecture.y.push(l.Lecture);
+                this[str].lecture.y.push(l.lecture);
                 this[str].attend.y.push(l.attend);
             }
             this[str].all.x = x;
             this[str].lecture.x = x;
             this[str].attend.x = x;
+            console.log(this[str].lecture)
         },
         dataPie(str,data,num){//饼状图处理
             this[str].all = {simple:[],detail:[]};
@@ -676,6 +720,13 @@ export default {
                         background-color: #eee;
                     }
                 }
+            }
+            .school{
+                position: absolute;
+                bottom: 5px;
+                right: 5px;
+                height: 40px;
+                width: 200px;
             }
         }
         .tour_data{
@@ -846,27 +897,27 @@ export default {
                 border-bottom: solid 1px #ccc;
                 display: flex;
                 align-items: center;
-                .cooperation_info{
-                    height: 100%;
-                    width: 50%;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    .cooperation_title{
-                        color: #909399;
-                        font-size: 14px;
-                    }
-                    .cooperation_num{
-                        font-size: 34px;
-                        color: #303133;
-                    }
+                flex-direction: column;
+                justify-content: center;
+                .cooperation_title{
+                    font-size: 14px;
+                    color: #909399;
+                    line-height: 20px;
+                    margin-bottom: 16px;
                 }
-                .hr{
-                    height: 50%;
-                    width: 1px;
-                    background-color: #E4E7ED;
+                .cooperation_name{
+                    font-size: 20px;
+                    line-height: 24px;
+                    color: #409EFF;
+                    width: 100%;
+                    padding: 0 10px;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    text-align: center;
                 }
+
             }
             .cooperation_bottom{
                 height: 40%;

@@ -3,8 +3,8 @@
         <div class="info">
             <div class="introduce">
                 <b>WELCOME TO DOUBLE TEACHER</b>
-                <h2>双师系统管理后台</h2>
-                <p>优质教师资源最大化共享，激发学生学习的兴趣</p>
+                <h2>教育局双师系统管理后台</h2>
+                <p>优质教师资源最大化共享，激发学生学习兴趣</p>
             </div>
             <div class="data">
                 <div class="account input">
@@ -87,24 +87,28 @@ export default {
                 method:'post',
                 url:'/login',
                 data:{
-                    username:this.account,
+                    name:this.account,
                     password:this.password
                 }
             }).then((res)=>{
                 this.loginload = false;
                 if(res.data.code == 0){
                     let info = JSON.stringify({
-                        account:this.account,
-                        token:res.data.obj.api_token
+                        account : this.account,
+                        token : res.data.obj.api_token,
+                        city : res.data.obj.city || "",
+                        district : res.data.obj.district || "",
+                        province : res.data.obj.province || "",
+                        type: res.data.obj.type_id
                     })
-                    this.$cookies.set('double_class', info, {
+                    this.$cookies.set('double_class_edu', info, {
                         path:'/',
                         maxAge: 60 * 60 * 48
                     });
                     this.$router.push('/')
                 }else{
-                    this.$message.error(res.data.message);
-                    this.$cookies.remove('double_class',{
+                    this.$message.error(res.data.msg);
+                    this.$cookies.remove('double_class_edu',{
                         path:'/'
                     });
                 }

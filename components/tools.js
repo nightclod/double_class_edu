@@ -60,7 +60,7 @@ export const deepCopy = (obj)=>{//深拷贝
 }
 
 export const verifyToken = (cb)=>{//验证token失效
-    let arr,reg=new RegExp("(^| )double_class=([^;]*)(;|$)");
+    let arr,reg=new RegExp("(^| )double_class_edu=([^;]*)(;|$)");
     arr= window.document.cookie.match(reg);
     if(arr){
         let info = JSON.parse(decodeURIComponent(arr[2]))

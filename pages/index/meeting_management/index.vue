@@ -7,22 +7,23 @@
                     <div class="switch">
                         <el-radio-group v-model="show_info" size="small">
                             <el-radio-button label="mine">自己</el-radio-button>
-                            <el-radio-button label="classroom">教室</el-radio-button>
+                            <el-radio-button label="classroom" :disabled='!live_state'>教室</el-radio-button>
                         </el-radio-group>
                     </div>
                     <div class="class_filter">
-                        <el-cascader size="small" 
+                        <el-cascader
+                            size="small"
                             v-show="show_info == 'classroom'" 
-                            placeholder="请选择班级" 
-                            v-model="class_filter" 
-                            :options="class_info" 
-                            :props="{ expandTrigger: 'hover' }" 
-                            @change="refresh" 
+                            placeholder="请选择班级"
+                            v-model="class_filter"
+                            :props="class_props"
+                            @change="refresh"
                             clearable>
                         </el-cascader>
                     </div>
                     <div class="list_add">
-                        <el-button size="small" type="primary" @click="addMeeting" :disabled='live_disabled'>发起会议</el-button>
+                        <el-button size="small" type="primary" @click="addMeeting" v-show="!live_state" :disabled='live_disabled'>发起会议</el-button>
+                        <el-button size="small" type="danger" @click="stopMeeting" v-show="live_state">停止会议</el-button>
                     </div>
                 </div>
             </div>
@@ -98,7 +99,7 @@
                 </div>
             </div>
         </div>
-        <AddDialog ref="add_dialog"></AddDialog>
+        <AddDialog ref="add_dialog" @meetAdd="meetAdd"></AddDialog>
     </Frame>
 </template>
 
@@ -115,40 +116,16 @@
             return {
                 loading: false,
                 show_info: "mine",
-                class_filter: [],
-                class_info: [
-                    {
-                        value: 1,
-                        label: "一年级",
-                        children: [
-                            {
-                                value: 1,
-                                label: "一班",
-                            },
-                            {
-                                value: 2,
-                                label: "五十五班",
-                            },
-                        ],
-                    },{
-                        value: 2,
-                        label: "二年级",
-                        children: [
-                            {
-                                value: 1,
-                                label: "一班",
-                            },
-                            {
-                                value: 2,
-                                label: "二班",
-                            },
-                            {
-                                value: 3,
-                                label: "三班",
-                            },
-                        ],
-                    },
-                ],
+
+                class_filter:[],
+                class_props:{
+                    lazy : true,
+                    lazyLoad : this.lazyLoad
+                },
+
+                live_state:false,
+
+
                 camera_stream:null,
                 live_disabled:false,
 
@@ -174,15 +151,91 @@
             AddDialog,
         },
         methods: {
-            refresh() {},
+            lazyLoad(node,resolve){//动态加载
+                const { level } = node;
+                if(level === 0){
+                    this.getGradeData((data)=>{
+                        resolve(data);
+                    })
+                }else if(level === 1){
+                    this.getClassData(node,(data)=>{
+                        resolve(data);
+                    });
+                }
+            },
+            getGradeData(cb){//获取年级信息
+                this.$axios.post('/meeting/grade').then(res=>{
+                    if(res.data.code && res.data.code != 0){
+                        this.$message.error(res.data.msg);
+                        cb && cb(null);
+                    }else{
+                        let info = [];
+                        for(let l of res.data.obj){
+                            info.push({
+                                label:l,
+                                value:l,
+                                leaf:false
+                            })
+                        }
+                        cb && cb(info);
+                    }
+                }).catch(err=>{
+                    console.log(err)
+                    if(!err || err.message !== null){
+                        this.$message.error("获取年级数据失败");
+                    }
+                    cb && cb(null);
+                });
+            },
+            getClassData(data,cb){//获取班级信息
+                this.$axios.post('/meeting/class',{
+                    grade_id :data.value
+                }).then(res=>{
+                    if(res.data.code && res.data.code != 0){
+                        this.$message.error(res.data.msg);
+                        cb && cb(null);
+                    }else{
+                        let info = [];
+                        for(let l of res.data.obj){
+                            info.push({
+                                label:l.name,
+                                value:l.id,
+                                leaf:true
+                            })
+                        }
+                        cb && cb(info);
+                    }
+                }).catch(err=>{
+                    console.log(err)
+                    if(!err || err.message !== null){
+                        this.$message.error("获取数据失败");
+                    }
+                    cb && cb(null);
+                });
+            },
 
+            
             addMeeting() {//发起会议
                 this.$refs.add_dialog.open();
             },
-
-            mineRefresh(){//重新推流
+            meetAdd(data){//会议发起后
+                console.log(data);
+                this.live_state = true;
+            },
+            stopMeeting(){//停止会议
 
             },
+            
+
+
+
+
+
+
+
+
+
+            //rtc
             showCamera(){//展示摄像
                 let video = this.$refs.mine_video;
                 if ("srcObject" in video) {
@@ -194,12 +247,14 @@
                     video.play();
                 };
             },
+            mineRefresh(){//重新推流
 
+            },
+            refresh(){
 
+            },
 
-
-
-
+            //全屏
             mouseenterL(e) {//移入
                 this.play_tool_show = true;
                 this.play_setTimeout = setTimeout(() => {
@@ -238,7 +293,6 @@
         },
         mounted() {
             initFullScreen(this);
-
             initMedia();
             // this.camera = new RTCPeerConnection({sdpSemantics:'unified-plan'});
             // this.screen = new RTCPeerConnection({sdpSemantics:'unified-plan'});
@@ -258,6 +312,8 @@
                     this.is_full = null;
                 }
             };
+
+            // this.getGradeData();
         },
     };
 </script>

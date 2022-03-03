@@ -134,7 +134,7 @@ export default {
                this.meundata.splice(id,1,data);
             }else{//跳转
                 if(this.$route.path == (this.type + this.meundata[id].route)){
-                    this.$router.go(0);
+                    this.$emit('refresh');
                 }else{
                     this.$router.push(this.type + this.meundata[id].route);
                 }
@@ -142,7 +142,7 @@ export default {
         },
         openSec(firstid,secondid){//菜单栏跳转
             if(this.$route.path == (this.type + this.meundata[firstid].route + '/' + this.meundata[firstid].list[secondid].route)){
-                this.$router.go(0);
+                this.$emit('refresh');
             }else{
                 this.$router.push(this.type + this.meundata[firstid].route + '/' + this.meundata[firstid].list[secondid].route);
             }
