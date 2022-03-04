@@ -16,7 +16,8 @@
                             v-show="show_info == 'classroom'" 
                             placeholder="请选择班级"
                             v-model="class_filter"
-                            :props="class_props"
+                            :options="class_options"
+                            :props="{ expandTrigger: 'hover' }"
                             @change="refresh"
                             clearable>
                         </el-cascader>
@@ -116,19 +117,12 @@
             return {
                 loading: false,
                 show_info: "mine",
-
                 class_filter:[],
-                class_props:{
-                    lazy : true,
-                    lazyLoad : this.lazyLoad
-                },
-
+                class_options:[],
                 live_state:false,
-
 
                 camera_stream:null,
                 live_disabled:false,
-
                 mine_refresh_loading:false,
                 camera:true,
                 voice:true,
@@ -151,70 +145,44 @@
             AddDialog,
         },
         methods: {
-            lazyLoad(node,resolve){//动态加载
-                const { level } = node;
-                if(level === 0){
-                    this.getGradeData((data)=>{
-                        resolve(data);
-                    })
-                }else if(level === 1){
-                    this.getClassData(node,(data)=>{
-                        resolve(data);
-                    });
-                }
-            },
-            getGradeData(cb){//获取年级信息
-                this.$axios.post('/meeting/grade').then(res=>{
+            getClassData(){//获取班级信息
+                this.$axios.post('/meeting/sel').then(res=>{
                     if(res.data.code && res.data.code != 0){
                         this.$message.error(res.data.msg);
-                        cb && cb(null);
                     }else{
                         let info = [];
                         for(let l of res.data.obj){
-                            info.push({
-                                label:l,
-                                value:l,
-                                leaf:false
-                            })
+                            let data = {
+                                label : l.title,
+                                value : l.id,
+                                children : []
+                            }
+                            for(let m of l.grade){
+                                let con = {
+                                    label : m.name,
+                                    value : m.name,
+                                    children : []
+                                }
+                                for(let k of m.class){
+                                    con.children.push({
+                                        label : k.name,
+                                        value : k.id
+                                    })
+                                }
+                                data.children.push(con)
+                            }
+                            info.push(data)
                         }
-                        cb && cb(info);
-                    }
-                }).catch(err=>{
-                    console.log(err)
-                    if(!err || err.message !== null){
-                        this.$message.error("获取年级数据失败");
-                    }
-                    cb && cb(null);
-                });
-            },
-            getClassData(data,cb){//获取班级信息
-                this.$axios.post('/meeting/class',{
-                    grade_id :data.value
-                }).then(res=>{
-                    if(res.data.code && res.data.code != 0){
-                        this.$message.error(res.data.msg);
-                        cb && cb(null);
-                    }else{
-                        let info = [];
-                        for(let l of res.data.obj){
-                            info.push({
-                                label:l.name,
-                                value:l.id,
-                                leaf:true
-                            })
-                        }
-                        cb && cb(info);
+                        this.class_options = info;
                     }
                 }).catch(err=>{
                     console.log(err)
                     if(!err || err.message !== null){
                         this.$message.error("获取数据失败");
                     }
-                    cb && cb(null);
                 });
             },
 
-            
             addMeeting() {//发起会议
                 this.$refs.add_dialog.open();
             },
@@ -223,17 +191,24 @@
                 this.live_state = true;
             },
             stopMeeting(){//停止会议
-
+                if(this.loading){
+                    return
+                }
+                this.loading = true;
+                this.$axios.post('/meeting/exit').then(res=>{
+                    this.loading = false;
+                    if(res.data.code && res.data.code != 0){
+                        this.$message.error(res.data.msg);
+                    }else{
+                        this.live_state = false;
+                    }
+                }).catch(err=>{
+                     this.loading = false;
+                    if(!err || err.message !== null){
+                        this.$message.error("结束会议失败");
+                    }
+                });
             },
-            
-
-
-
-
-
-
-
-
 
             //rtc
             showCamera(){//展示摄像
@@ -248,10 +223,8 @@
                 };
             },
             mineRefresh(){//重新推流
-
             },
             refresh(){
-
             },
 
             //全屏
@@ -313,7 +286,7 @@
                 }
             };
 
-            // this.getGradeData();
+            this.getClassData();
         },
     };
 </script>

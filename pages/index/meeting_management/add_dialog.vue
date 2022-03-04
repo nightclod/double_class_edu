@@ -8,7 +8,6 @@
         width="40%" 
         v-loading="loading">
         <div class="info">
-            
             <div class="list">
                 <label>标题：</label>
                 <div class="detail">
@@ -18,21 +17,45 @@
                     ref="title_info"></el-input>
                 </div>
             </div>
-
             <div class="list">
                 <label>关联年级：</label>
                 <div class="detail">
-                    <el-cascader
-                    placeholder="请选择班级"
-                    v-model="class_info"
-                    :options="class_list"
-                    :props="{ multiple: true }"
-                    ref="class_info"
-                    clearable></el-cascader>
+                    <el-select 
+                        multiple
+                        placeholder="请选择年级"
+                        v-model="grade_info"
+                        ref="grade_info"
+                        @change="gradeChange"
+                        clearable>
+                        <el-option
+                            v-for="(l,i) in grade_list"
+                            :key="i"
+                            :label="l.name"
+                            :value="l.id">
+                        </el-option>
+                    </el-select>
                 </div>
             </div>
-            
-            
+            <div class="list">
+                <label>关联学校：</label>
+                <div class="detail">
+                    <el-select 
+                        multiple
+                        placeholder="请选择学校"
+                        v-model="school_info"
+                        ref="school_info"
+                        :loading="school_loading"
+                        :disabled="school_disabled"
+                        clearable>
+                        <el-option
+                            v-for="(l,i) in school_list"
+                            :key="i"
+                            :label="l.title"
+                            :value="l.id">
+                        </el-option>
+                    </el-select>
+                </div>
+            </div>
         </div>
         <span slot="footer" class="dialog-footer">
             <el-button @click="dialogVisible = false" size="medium">返回</el-button>
@@ -50,41 +73,33 @@ export default {
         return {
             dialogVisible:false,
             loading:false,
-
-            
-            class_info:[],
-            class_list:[{
-                value:1,
-                label:'一年级',
-                children:[{
-                    value:1,
-                    label:'一班'
-                },{
-                    value:2,
-                    label:'二班'
-                }]
-            },{
-                value:2,
-                label:'二年级',
-                children:[{
-                    value:1,
-                    label:'一班'
-                },{
-                    value:2,
-                    label:'二班'
-                },{
-                    value:3,
-                    label:'三班'
-                }]
-            }],
+            school_loading:false,
+            school_disabled:true,
+            grade_info:[],
+            grade_list:[],
+            school_info:[],
+            school_list:[],
             title_info:""
         }
     },
     methods: {
         open(){//打开页面
             this.title_info = "",
-            this.class_info = [];
+            this.grade_info = [];
+            this.school_info = [];
+            this.school_list = [];
+            this.school_loading = false;
+            this.school_disabled = true;
             this.dialogVisible = true;
+        },
+        gradeChange(){//年级修改
+            this.school_info = [];
+            if(this.grade_info.length == 0){
+                this.school_disabled = true;
+            }else{
+                this.school_disabled = false;
+                this.getSchoolData();
+            }
         },
         
         verify(){//验证数据
@@ -93,42 +108,79 @@ export default {
                 this.$refs.title_info.focus();
                 return
             }
-            if(this.class_info === [] || this.class_info === null){
-                this.$message.error("请选择班级");
-                this.$refs.class_info.focus();
+            if(this.grade_info.length == 0 || this.grade_info === null){
+                this.$message.error("请选择年级");
+                this.$refs.grade_info.focus();
                 return
             }
-           
-            
+            if(this.school_info.length == 0 || this.school_info === null){
+                this.$message.error("请选择学校");
+                this.$refs.school_info.focus();
+                return
+            }
             this.postData();
         },
         postData(){//提交数据
             if(this.loading){
                 return
             }
-            // this.loading = true;
-           
-            // this.$axios.post('/commission/save',{
-            //     id : this.school,
-            //     grade:this.grade.sort((a,b)=>{return a-b})
-            // }).then(res=>{
-            //     this.loading = false;
-            //     if(res.data.code && res.data.code != 0){
-            //         this.$message.error(res.data.msg);
-            //     }else{
-            //         this.$parent.getData();
-            //         this.dialogVisible = false;
-            //     }
-            // }).catch(err=>{
-            //     this.loading = false;
-			// 	console.log(err)
-            //     if(!err || err.message !== null){
-            //         this.$message.error("提交数据失败");
-            //     }
-            // });
+            this.loading = true;
+            this.$axios.post('/meeting/add',{
+                title : this.title_info,
+                school_ids : this.school_info,
+                grade_ids : this.grade_info
+            }).then(res=>{
+                this.loading = false;
+                if(res.data.code && res.data.code != 0){
+                    this.$message.error(res.data.msg);
+                }else{
+                    this.$emit('meetAdd',res.data.obj.room)
+                    this.dialogVisible = false;
+                }
+            }).catch(err=>{
+                this.loading = false;
+				console.log(err)
+                if(!err || err.message !== null){
+                    this.$message.error("提交数据失败");
+                }
+            });
+        },
+        getGradeData(){//获取年级数据
+            this.$axios.post('/meeting/grade').then(res=>{
+                if(res.data.code && res.data.code != 0){
+                    this.$message.error(res.data.msg);
+                }else{
+                    this.grade_list = res.data.obj;
+                }
+            }).catch(err=>{
+				console.log(err)
+                if(!err || err.message !== null){
+                    this.$message.error("获取年级数据失败");
+                }
+            });
+        },
+        getSchoolData(){//获取学校数据
+            this.school_loading = true;
+            this.$axios.post('/meeting/school',{
+                grade_ids:this.grade_info
+            }).then(res=>{
+                 this.school_loading = false;
+                if(res.data.code && res.data.code != 0){
+                    this.$message.error(res.data.msg);
+                }else{
+                    this.school_list = res.data.obj;
+                }
+            }).catch(err=>{
+                 this.school_loading = false;
+				console.log(err)
+                if(!err || err.message !== null){
+                    this.$message.error("获取学校数据失败");
+                }
+            });
         },
     },
     mounted() {
+        this.getGradeData();
     }
 }
 </script>

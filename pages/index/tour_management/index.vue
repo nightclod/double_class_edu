@@ -252,7 +252,7 @@ export default {
                 if(res.data.code && res.data.code != 0){
                     this.$message.error(res.data.msg);
                 }else{
-                    this.total = res.data.total;
+                    this.total = res.data.obj.total;
                     this.data = res.data.obj.data;
                     this.$nextTick(()=>{
                         this.detectionList();
