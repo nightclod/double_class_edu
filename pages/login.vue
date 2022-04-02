@@ -38,7 +38,7 @@
         
        
         <div class="foot">
-            <p><a href="http://beian.miit.gov.cn/">© copy 浙ICP备16032007-1号</a> | 杭州书山府科技有限公司 联系电话：0571-86131512</p>
+            <p><a href="http://beian.miit.gov.cn/">© copy 浙ICP备16032007号-2</a> | 杭州书山府科技有限公司 联系电话：0571-86131512</p>
         </div>
     </div>
 </template>
@@ -47,7 +47,7 @@ import {verifyToken} from '@/components/tools.js'
 export default {
     name:'login',
     head:{
-        title:'登录 - '
+        title:'EI课堂 - '
     },
     data() {
         return {
